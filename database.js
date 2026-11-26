@@ -427,6 +427,32 @@ async function initDatabase() {
     await dbAsync.run('DELETE FROM rental_printers WHERE LOWER(location) IN (SELECT LOWER(location_name) FROM excluded_locations)');
     await dbAsync.run('DELETE FROM departments WHERE LOWER(name) IN (SELECT LOWER(location_name) FROM excluded_locations)');
     await dbAsync.run('DELETE FROM department_master WHERE LOWER(department_name) IN (SELECT LOWER(location_name) FROM excluded_locations)');
+    await dbAsync.run('DELETE FROM submissions WHERE LOWER(location) IN (SELECT LOWER(location_name) FROM excluded_locations)');
+    await dbAsync.run('DELETE FROM fact_printer_count WHERE dep_id IN (SELECT id FROM departments WHERE LOWER(name) IN (SELECT LOWER(location_name) FROM excluded_locations))');
+
+    // Startup sync: Ensure all rental_printers are registered in printer_master with correct dep_id
+    const rentals = await dbAsync.all('SELECT * FROM rental_printers WHERE location NOT IN (SELECT location_name FROM excluded_locations)');
+    for (const r of rentals) {
+      await dbAsync.run(
+        `INSERT INTO printer_master (printer_model, serial_number, location, dep_id, branch)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(serial_number) DO UPDATE SET
+           location = excluded.location,
+           dep_id = excluded.dep_id,
+           branch = excluded.branch,
+           printer_model = excluded.printer_model`,
+        [r.model || '243DW', r.serial_number, r.location, r.department_id, r.branch || '']
+      );
+    }
+
+    // Ensure fact_printer_count correctly references each department's own printer_id
+    const printersWithDep = await dbAsync.all('SELECT printer_id, dep_id FROM printer_master WHERE dep_id IS NOT NULL');
+    for (const p of printersWithDep) {
+      await dbAsync.run(
+        'UPDATE fact_printer_count SET printer_id = ? WHERE dep_id = ?',
+        [p.printer_id, p.dep_id]
+      );
+    }
 
     // Ensure date_master has current year calendar days
     const currentYear = new Date().getFullYear();

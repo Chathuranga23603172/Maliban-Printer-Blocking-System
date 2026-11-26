@@ -489,9 +489,15 @@ app.post('/api/submissions', async (req, res) => {
         matchedUser = await dbAsync.get('SELECT uid FROM user_master ORDER BY uid ASC LIMIT 1');
       }
 
-      let matchedPrinter = await dbAsync.get('SELECT printer_id FROM printer_master WHERE dep_id = ? LIMIT 1', [department_id]);
-      if (!matchedPrinter) {
-        matchedPrinter = await dbAsync.get('SELECT printer_id FROM printer_master ORDER BY printer_id ASC LIMIT 1');
+      let matchedPrinter = null;
+      if (department_id) {
+        matchedPrinter = await dbAsync.get('SELECT printer_id FROM printer_master WHERE dep_id = ? LIMIT 1', [department_id]);
+      }
+      if (!matchedPrinter && finalLocation) {
+        matchedPrinter = await dbAsync.get('SELECT printer_id FROM printer_master WHERE LOWER(location) = LOWER(?) LIMIT 1', [finalLocation]);
+      }
+      if (!matchedPrinter && finalLocation) {
+        matchedPrinter = await dbAsync.get('SELECT printer_id FROM printer_master WHERE LOWER(location) LIKE LOWER(?) LIMIT 1', [`%${finalLocation}%`]);
       }
 
       const dateId = await getOrCreateDateId(new Date());

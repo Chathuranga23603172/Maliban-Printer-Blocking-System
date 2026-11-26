@@ -220,9 +220,10 @@ async function compileMonthlyReport(targetYear, targetMonth) {
         `SELECT print_count, submitted_at, week_start_date 
          FROM submissions 
          WHERE status = 'Submitted'
+           AND (location IS NULL OR LOWER(location) NOT IN (SELECT LOWER(location_name) FROM excluded_locations))
            AND (
              (printer_id IS NOT NULL AND printer_id = ?)
-             OR (department_id IS NOT NULL AND department_id = ?)
+             OR (department_id IS NOT NULL AND department_id = ? AND (location IS NULL OR LOWER(location) = LOWER(?)))
              OR LOWER(location) = LOWER(?)
            )
            AND (
@@ -233,7 +234,7 @@ async function compileMonthlyReport(targetYear, targetMonth) {
          ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
         [
-          p.printer_id || 0, p.dep_id || 0, cleanLocation,
+          p.printer_id || 0, p.dep_id || 0, cleanLocation, cleanLocation,
           cycle.currentCutoff,
           String(cycle.year), cycle.month,
           String(cycle.year), cycle.month
@@ -286,9 +287,10 @@ async function compileMonthlyReport(targetYear, targetMonth) {
         `SELECT print_count, submitted_at, week_start_date 
          FROM submissions 
          WHERE status = 'Submitted'
+           AND (location IS NULL OR LOWER(location) NOT IN (SELECT LOWER(location_name) FROM excluded_locations))
            AND (
              (printer_id IS NOT NULL AND printer_id = ?)
-             OR (department_id IS NOT NULL AND department_id = ?)
+             OR (department_id IS NOT NULL AND department_id = ? AND (location IS NULL OR LOWER(location) = LOWER(?)))
              OR LOWER(location) = LOWER(?)
            )
            AND (
@@ -299,7 +301,7 @@ async function compileMonthlyReport(targetYear, targetMonth) {
          ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
         [
-          p.printer_id || 0, p.dep_id || 0, cleanLocation,
+          p.printer_id || 0, p.dep_id || 0, cleanLocation, cleanLocation,
           cycle.prevCutoff,
           String(cycle.prevYear), cycle.prevMonth,
           String(cycle.prevYear), cycle.prevMonth
@@ -338,15 +340,16 @@ async function compileMonthlyReport(targetYear, targetMonth) {
         `SELECT print_count, submitted_at
          FROM submissions
          WHERE status = 'Submitted'
+           AND (location IS NULL OR LOWER(location) NOT IN (SELECT LOWER(location_name) FROM excluded_locations))
            AND datetime(submitted_at) < datetime(?)
            AND (
              (printer_id IS NOT NULL AND printer_id = ?)
-             OR (department_id IS NOT NULL AND department_id = ?)
+             OR (department_id IS NOT NULL AND department_id = ? AND (location IS NULL OR LOWER(location) = LOWER(?)))
              OR LOWER(location) = LOWER(?)
            )
          ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
-        [monthStart, p.printer_id || 0, p.dep_id || 0, cleanLocation]
+        [monthStart, p.printer_id || 0, p.dep_id || 0, cleanLocation, cleanLocation]
       );
       if (initialSub && initialSub.print_count !== null) {
         prevTotal = initialSub.print_count;
