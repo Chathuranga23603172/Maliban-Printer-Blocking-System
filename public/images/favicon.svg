@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001C44"/>
+      <stop offset="100%" stop-color="#002B66"/>
+    </linearGradient>
+    <linearGradient id="redAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="100%" stop-color="#D9252C"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background Pill: Little Lion Dark Blue -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bgGrad)" stroke="#0D3A78" stroke-width="1.5"/>
+
+  <!-- Top Red Accent Indicator Line -->
+  <rect x="18" y="2" width="28" height="2.5" rx="1" fill="url(#redAccent)"/>
+
+  <!-- Top Feed Paper (White) -->
+  <path d="M 20 12 L 44 12 L 44 24 L 20 24 Z" fill="#FFFFFF" rx="2"/>
+  <line x1="24" y1="16" x2="38" y2="16" stroke="#CBD5E1" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="24" y1="20" x2="34" y2="20" stroke="#CBD5E1" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Printer Main Body (Pure White with shadow) -->
+  <rect x="10" y="23" width="44" height="23" rx="5" fill="#FFFFFF" filter="url(#shadow)"/>
+
+  <!-- Control Buttons & Red Status LED -->
+  <circle cx="46" cy="28.5" r="2.2" fill="url(#redAccent)"/>
+  <circle cx="40" cy="28.5" r="1.6" fill="#002B66"/>
+
+  <!-- Output Paper Slot (Dark Blue Cavity) -->
+  <rect x="16" y="34" width="32" height="10" rx="2" fill="#001C44"/>
+
+  <!-- Printed Paper Output (White page extending out) -->
+  <path d="M 19 36 L 45 36 L 45 53 L 19 53 Z" fill="#FFFFFF" filter="url(#shadow)"/>
+  <line x1="23" y1="41" x2="41" y2="41" stroke="#002B66" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="23" y1="45" x2="36" y2="45" stroke="#002B66" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="23" y1="49" x2="31" y2="49" stroke="#D9252C" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

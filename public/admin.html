@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Admin Dashboard - Printer Restriction Automation & Star Schema DW</title>
+  <!-- Browser Tab Favicon (Little Lion Corporate Printer Icon) -->
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/favicon.png">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand py-1 me-3" href="/admin">
+          <div class="navbar-brand-logo">
+            <img src="images/little-lion-logo.png" alt="Little Lion Logo">
+          </div>
+        </a>
+        <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
+          <div class="title-text d-flex align-items-center">
+            
+            <span>Maliban Print Governance &amp; Warehouse Admin</span>
+          </div>
+          <div class="subtitle-text mt-1" id="currentWeekSubtitle">
+            Star Schema Master Data Management, Spooler Governance &amp; Reporting
+          </div>
+        </div>
+      </div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="adminNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <button class="btn btn-outline-light btn-sm px-3" id="btnRefresh">
+               Refresh Data
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container-fluid px-4 py-4 flex-grow-1">
+
+    <!-- Main Navigation Bar / Tabs (Navbar Style) with Sync Button on Same Line -->
+    <div class="card shadow-sm border-0 mb-4 bg-white admin-tab-nav">
+      <div class="card-body p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <ul class="nav nav-pills gap-2 flex-wrap mb-0" id="adminMainTabNav" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active d-flex align-items-center" id="tab-governance-btn" data-bs-toggle="pill" data-bs-target="#tab-governance" type="button" role="tab" aria-selected="true">
+               Spooler Governance &amp; Compliance
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link d-flex align-items-center" id="tab-locations-btn" data-bs-toggle="pill" data-bs-target="#tab-locations" type="button" role="tab" aria-selected="false">
+               Location
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link d-flex align-items-center" id="tab-users-btn" data-bs-toggle="pill" data-bs-target="#tab-users" type="button" role="tab" aria-selected="false">
+               Users
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link d-flex align-items-center fw-semibold" id="tab-monthly-report-btn" data-bs-toggle="pill" data-bs-target="#tab-monthly-report" type="button" role="tab" aria-selected="false">
+               Monthly Usage Report
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Feedback Toast/Alert placeholder -->
+    <div id="adminAlertContainer"></div>
+
+    <!-- Tab Content Area -->
+    <div class="tab-content" id="adminMainTabContent">
+
+      <!-- Tab 1: Live Spooler Governance & Compliance -->
+      <div class="tab-pane fade show active" id="tab-governance" role="tabpanel" aria-labelledby="tab-governance-btn">
+
+      <!-- Stat Metric Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-primary">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="statTotalDepts">0</div>
+                  <div class="stat-label">Total Departments</div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="statSubmittedDepts">0</div>
+                  <div class="stat-label">Submitted This Week</div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-warning">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="statPendingDepts">0</div>
+                  <div class="stat-label">Pending Submissions</div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-danger">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="statBlockedDepts">0</div>
+                  <div class="stat-label">Spoolers Blocked</div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Departments & Status Table -->
+        <div class="card main-card">
+          <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+              Department Compliance & Print Spooler Control
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-light text-dark border p-2" id="tableWeekBadge">
+                Reporting Week
+              </span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle p-2" id="liveSyncBadge">
+                Live: 1m Auto-Sync
+              </span>
+              <button class="btn btn-sm btn-outline-primary" id="btnRefreshDashboard" title="Probe online/offline status of all workstations">
+                 Refresh Live Status
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="departmentsTable">
+              <thead>
+                <tr>
+                  <th style="width: 20%;">Department Name</th>
+                  <th style="width: 14%;">Spooler Status</th>
+                  <th style="width: 25%;">Assigned Workstations & Network Status</th>
+                  <th style="width: 12%;">Weekly Submission</th>
+                  <th style="width: 13%;">Counter Photo</th>
+                  <th style="width: 16%; text-align: center;">Manual Actions</th>
+                </tr>
+              </thead>
+              <tbody id="departmentsTableBody">
+                <tr>
+                  <td colspan="6" class="text-center py-4 text-muted">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Loading department statuses...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- /#tab-governance -->
+
+      <!-- Tab 2: Location (Insert Part + Display Part) -->
+      <div class="tab-pane fade" id="tab-locations" role="tabpanel" aria-labelledby="tab-locations-btn">
+        
+        <!-- Insert Part: Create Location Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="badge bg-success-subtle text-success border border-success-subtle p-2 me-2">
+                
+              </span>
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">Create New Plant Location & Printer Hardware</h5>
+                <div class="small text-muted">Register factory department/location, printer model, and hardware serial number</div>
+              </div>
+            </div>
+            <span class="badge bg-success text-white px-3 py-2 fw-semibold">
+               Little Lion 105, 11 & Kandawala
+            </span>
+          </div>
+          <div class="card-body p-4">
+            <div id="cl_feedback"></div>
+            <form id="formCreateLocation" novalidate>
+              <div class="row g-3">
+                <!-- Company Part -->
+                <div class="col-md-3">
+                  <label for="loc_branch" class="form-label fw-semibold">
+                     Company Part / Division <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select fw-semibold" id="loc_branch" required>
+                    <option value="">-- Select Division --</option>
+                    <option value="Little Lion 105">Little Lion 105</option>
+                    <option value="Little Lion 11">Little Lion 11</option>
+                    <option value="Kandawala">Kandawala</option>
+                  </select>
+                </div>
+
+                <!-- Location Name -->
+                <div class="col-md-3">
+                  <label for="loc_name" class="form-label fw-semibold">
+                     Location Name / Area <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="loc_name" placeholder="e.g. Packing Line 1, Stores" required>
+                </div>
+
+                <!-- Printer Model -->
+                <div class="col-md-3">
+                  <label for="loc_model" class="form-label fw-semibold">
+                     Printer Model <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="loc_model" placeholder="e.g. HP LaserJet Enterprise M608" required>
+                </div>
+
+                <!-- Serial Number -->
+                <div class="col-md-3">
+                  <label for="loc_serial" class="form-label fw-semibold">
+                     Serial Number <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control font-monospace text-uppercase" id="loc_serial" placeholder="e.g. PCHA020699" required>
+                </div>
+              </div>
+
+              <!-- Preview Box -->
+              <div class="alert alert-light border py-2 px-3 small my-3 text-secondary d-none" id="loc_preview_box">
+                 <strong>Location Preview:</strong> <span id="loc_preview_text" class="fw-bold text-dark">-</span>
+              </div>
+
+              <div class="d-flex justify-content-end mt-3 pt-3 border-top">
+                <button type="submit" class="btn btn-success px-4 py-2 fw-semibold shadow-sm" id="btnSubmitCreateLocation">
+                   Create Location & Printer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Display Part: Locations Directory Table Card -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2 me-2">
+                
+              </span>
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">Plant Locations & Printer Hardware Directory</h5>
+                <div class="small text-muted">Complete listing of plant locations, deployed printer models, serials and assigned workstations</div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-success fw-semibold" id="btnRefreshLocationList">
+               Refresh Directory
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div id="locationListFeedback" class="p-3 pb-0"></div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0" id="tableLocationList">
+                <thead class="table-light small text-uppercase fw-semibold">
+                  <tr>
+                    <th style="width: 18%;">Division / Branch</th>
+                    <th style="width: 24%;">Location Name</th>
+                    <th style="width: 22%;">Printer Model</th>
+                    <th style="width: 16%;">Hardware Serial No</th>
+                    <th style="width: 10%;">Assigned PCs</th>
+                    <th style="width: 10%;" class="text-end pe-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="locationListTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                      <div class="spinner-border spinner-border-sm text-success me-2"></div> Loading plant locations...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /#tab-locations -->
+
+      <!-- Tab 3: Users (Insert Part + Display Part) -->
+      <div class="tab-pane fade" id="tab-users" role="tabpanel" aria-labelledby="tab-users-btn">
+        
+        <!-- Insert Part: Create User Form Card -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2 me-2">
+                
+              </span>
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">Create New Supervisor User & PC Hardware Binding</h5>
+                <div class="small text-muted">Register user account, corporate email (@malibangroup.lk), plant location, MAC address and PC name</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" id="cu_btnAutoDetect">
+               Auto-Detect My PC & MAC
+            </button>
+          </div>
+          <div class="card-body p-4">
+            <div id="cu_feedback"></div>
+            <form id="formCreateUser" novalidate>
+              <div class="row g-3">
+                <!-- User Name -->
+                <div class="col-md-4">
+                  <label for="cu_name" class="form-label fw-semibold">
+                     User Name <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="cu_name" placeholder="e.g. Full Name" required>
+                </div>
+
+                <!-- Corporate Email -->
+                <div class="col-md-4">
+                  <label for="cu_email" class="form-label fw-semibold">
+                     Email (@malibangroup.lk) <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="cu_email" placeholder="username" required>
+                    <span class="input-group-text bg-light text-muted small">@malibangroup.lk</span>
+                  </div>
+                  <div class="form-text text-danger d-none" id="cu_email_err">Must end with @malibangroup.lk</div>
+                </div>
+
+                <!-- Location Select -->
+                <div class="col-md-4">
+                  <label for="cu_location" class="form-label fw-semibold">
+                     Location <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <select class="form-select" id="cu_location" required>
+                      <option value="">-- Select Location Name --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-success" id="cu_btnAddLocation" title="Create a new location in Location tab">
+                       + New
+                    </button>
+                  </div>
+                </div>
+
+                <!-- MAC Address -->
+                <div class="col-md-3">
+                  <label for="cu_mac" class="form-label fw-semibold">
+                     MAC Address (req) <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control font-monospace text-uppercase" id="cu_mac" placeholder="e.g. C8-95-CE-4A-5E-B6" maxlength="17" required>
+                  <div class="form-text">Physical MAC address for ARP tracking.</div>
+                </div>
+
+                <!-- PC Name -->
+                <div class="col-md-3">
+                  <label for="cu_pc" class="form-label fw-semibold">
+                     PC Name <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control font-monospace text-uppercase" id="cu_pc" placeholder="FIN-WS01" required>
+                  <div class="form-text">Windows PC hostname for spooler control.</div>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-3">
+                  <label for="cu_pass" class="form-label fw-semibold">
+                     Password <span class="text-danger">*</span>
+                  </label>
+                  <input type="password" class="form-control" id="cu_pass" placeholder="Minimum 4 characters" minlength="4" required>
+                </div>
+
+                <!-- re-Enter Password -->
+                <div class="col-md-3">
+                  <label for="cu_repass" class="form-label fw-semibold">
+                     re-Enter Password <span class="text-danger">*</span>
+                  </label>
+                  <input type="password" class="form-control" id="cu_repass" placeholder="Re-type password" required>
+                  <div id="cu_pass_match_indicator" class="small mt-1"></div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <span class="text-muted small">
+                   Dual Tracking: PC Name & MAC Address will be dynamically monitored
+                </span>
+                <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm" id="btnSubmitCreateUser">
+                   Create User & Track PC
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Display Part: Users Directory Table Card -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2 me-2">
+                
+              </span>
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">Supervisor Users & Workstations Directory</h5>
+                <div class="small text-muted">Complete overview of registered users, location assignments, bound workstations and live reachability</div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary fw-semibold" id="btnRefreshUserList">
+               Refresh Directory
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div id="userListFeedback" class="p-3 pb-0"></div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0" id="tableUserList">
+                <thead class="table-light small text-uppercase fw-semibold">
+                  <tr>
+                    <th style="width: 20%;">User &amp; Email</th>
+                    <th style="width: 16%;">Location</th>
+                    <th style="width: 13%;">PC Name</th>
+                    <th style="width: 15%;">MAC Address</th>
+                    <th style="width: 9%;">Spooler</th>
+                    <th style="width: 9%;">Live Status</th>
+                    <th style="width: 18%;" class="text-end pe-3 text-nowrap">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="userListTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                      <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading users...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /#tab-users -->
+
+      <!-- Tab 4: Monthly Print Usage Report -->
+      <div class="tab-pane fade" id="tab-monthly-report" role="tabpanel" aria-labelledby="tab-monthly-report-btn">
+
+        <!-- Top Action & Selection Bar -->
+        <div class="card shadow-sm border-0 mb-4 bg-white">
+          <div class="card-body p-3">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
+                  <span>📊</span> Monthly Print Usage Report
+                </h4>
+                <p class="text-muted small mb-0">
+                  Supervisor-submitted counts compiled on the 25th of every month &bull; Cutoff: <strong id="lblCutoffDateText">25th 23:59:59 (UTC+05:30)</strong>
+                </p>
+              </div>
+
+              <!-- Cycle Selector & Action Buttons -->
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="d-flex align-items-center gap-1">
+                  <label class="form-label small fw-semibold mb-0 text-muted">Month:</label>
+                  <select class="form-select form-select-sm" id="reportSelectMonth" style="width: 130px;">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                </div>
+
+                <div class="d-flex align-items-center gap-1">
+                  <label class="form-label small fw-semibold mb-0 text-muted">Year:</label>
+                  <select class="form-select form-select-sm" id="reportSelectYear" style="width: 95px;">
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                  </select>
+                </div>
+
+                <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" id="btnLoadMonthlyReport">
+                  <span>🔄</span> Load Preview
+                </button>
+
+                <button class="btn btn-sm btn-success d-flex align-items-center gap-1" id="btnDownloadReportExcel" style="background-color: #107C41; border-color: #107C41;">
+                  <span>📥</span> Download Excel (.xlsx)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-primary">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="metricGrandTotalUsage">0</div>
+                  <div class="stat-label">Total Monthly Usage (Pages)</div>
+                </div>
+                <div class="text-primary fs-3">📄</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="metricPrintersSubmitted">0 / 0</div>
+                  <div class="stat-label">Printers Submitted</div>
+                </div>
+                <div class="text-success fs-3">🖨️</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-danger">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number" id="metricPrintersPending">0</div>
+                  <div class="stat-label">Pending Verification</div>
+                </div>
+                <div class="text-danger fs-3">⏳</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card stat-warning">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="stat-number fs-5 mt-1" id="metricBillingCutoff">25th 23:59:59</div>
+                  <div class="stat-label">Billing Cutoff (UTC+05:30)</div>
+                </div>
+                <div class="text-warning fs-3">⏰</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Alert Container for Monthly Reports -->
+        <div id="monthlyReportFeedback"></div>
+
+        <!-- 5-Column Monthly Report Table Card -->
+        <div class="card shadow-sm border-0 mb-4 bg-white">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h5 class="fw-bold mb-0 text-dark" id="lblReportTitle">
+                Print Usage Compilation – November 2026
+              </h5>
+              <div class="text-muted small">
+                Showing meter readings before cutoff date: <span id="lblCutoffDateBadge" class="fw-semibold text-dark"></span>
+              </div>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-2" id="lblReportStatusBadge">
+              11 Active Printers
+            </span>
+          </div>
+
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0" id="tableMonthlyUsageReport">
+                <thead class="text-uppercase fw-bold text-center" style="background-color: #00B0F0; color: #000000; font-size: 13px;">
+                  <tr>
+                    <th style="width: 28%; padding: 12px 16px; border: 1px solid #000000;" id="thCol1">LOCATION</th>
+                    <th style="width: 18%; padding: 12px 16px; border: 1px solid #000000;" id="thCol2">SERIAL</th>
+                    <th style="width: 18%; padding: 12px 16px; border: 1px solid #000000;" id="thCol3">TOTAL OCTOBER</th>
+                    <th style="width: 18%; padding: 12px 16px; border: 1px solid #000000;" id="thCol4">TOTAL NOVEMBER</th>
+                    <th style="width: 18%; padding: 12px 16px; border: 1px solid #000000;" id="thCol5">NOVEMBER USAGE</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyReportTableBody" class="text-center font-monospace" style="font-size: 14px;">
+                  <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                      <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading monthly print usage data...
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot id="monthlyReportTableFoot" class="fw-bold text-uppercase" style="background-color: #f1f5f9; font-size: 14px; border-top: 2px solid #000; border-bottom: 3px double #000;">
+                  <tr>
+                    <td colspan="4" class="text-end pe-4 py-3">GRAND TOTAL:</td>
+                    <td class="text-end pe-4 py-3 font-monospace text-primary" id="tdGrandTotalFoot" style="font-size: 16px;">0</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historical Reports Archive -->
+        <div class="card shadow-sm border-0 mb-4 bg-white">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <span>🗄️</span> Historical Reports Archive
+              </h6>
+              <div class="text-muted small">Snapshots and exports of past monthly billing cycles</div>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary" id="btnRefreshArchive">
+              🔄 Refresh Archive
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 400px;">
+              <table class="table table-hover align-middle mb-0" id="tableReportArchive">
+                <thead class="table-light small text-uppercase fw-semibold">
+                  <tr>
+                    <th>Billing Cycle</th>
+                    <th class="text-end">Total Usage</th>
+                    <th class="text-center">Printers</th>
+                    <th>Cutoff Date</th>
+                    <th class="text-end pe-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="reportArchiveTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Loading archive records...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /#tab-monthly-report -->
+
+    </div> <!-- /#adminMainTabContent -->
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODALS -->
+  <!-- ========================================================= -->
+
+  <!-- Modal 1: User Master (Add/Edit) -->
+  <div class="modal fade" id="userMasterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold" id="userMasterModalTitle">
+            User Master Entry
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formUserMaster">
+            <input type="hidden" id="userUidInput" value="" />
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="userNameInput" placeholder="e.g. Full Name" required />
+            </div>
+            <div class="mb-3">
+              <label class="label fw-semibold">PC Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="userPcInput" placeholder="e.g. PC-NAME-01" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">MAC Address <span class="text-muted">(Optional)</span></label>
+              <input type="text" class="form-control font-monospace" id="userMacInput" placeholder="e.g. B4-2E-99-A1-22-34" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Password <span class="text-danger" id="userPassRequiredStar">*</span></label>
+              <input type="password" class="form-control" id="userPasswordInput" placeholder="••••••••" />
+              <div class="form-text small" id="userPassHelp">Leave blank on edit to keep unchanged.</div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold">Role</label>
+                <select class="form-select" id="userRoleSelect">
+                  <option value="supervisor" selected>Supervisor</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold">Department</label>
+                <select class="form-select" id="userDeptSelect">
+                  <option value="">-- No Dept --</option>
+                </select>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSaveUser">Save User</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Department Master (Add/Edit) -->
+  <div class="modal fade" id="deptMasterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold" id="deptMasterModalTitle">
+            Department Master Entry
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formDeptMaster">
+            <input type="hidden" id="deptIdInput" value="" />
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Department Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="deptNameInput" placeholder="e.g. Procurement & Inventory" required />
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success" id="btnSaveDept">Save Department</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Printer Master (Add/Edit) -->
+  <div class="modal fade" id="printerMasterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title fw-bold" id="printerMasterModalTitle">
+            Printer Master Entry
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formPrinterMaster">
+            <input type="hidden" id="printerIdInput" value="" />
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Printer Model</label>
+              <input type="text" class="form-control" id="printerModelInput" placeholder="e.g. HP LaserJet Enterprise M608" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Serial Number <span class="text-danger">*</span></label>
+              <input type="text" class="form-control font-monospace" id="printerSerialInput" placeholder="e.g. 34Y37220" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Location / Physical Office</label>
+              <input type="text" class="form-control" id="printerLocationInput" placeholder="e.g. FG STORES" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Assigned Department</label>
+              <select class="form-select" id="printerDeptSelect">
+                <option value="">-- General / Plant Wide --</option>
+              </select>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-info text-white" id="btnSavePrinter">Save Printer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Fact Table Printer_Count (Add/Edit) -->
+  <div class="modal fade" id="factCountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title fw-bold" id="factCountModalTitle">
+            Log Print Count to Fact Table
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formFactCount">
+            <input type="hidden" id="factCountIdInput" value="" />
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Department (Dep_ID) <span class="text-danger">*</span></label>
+                <select class="form-select" id="factDeptSelect" required>
+                  <option value="" disabled selected>-- Select Department --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Reporting User (UID) <span class="text-danger">*</span></label>
+                <select class="form-select" id="factUserSelect" required>
+                  <option value="" disabled selected>-- Select User --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Target Printer (Printer_ID) <span class="text-danger">*</span></label>
+                <select class="form-select" id="factPrinterSelect" required>
+                  <option value="" disabled selected>-- Select Printer --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Date of Record <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="factDateInput" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Print Count (Cumulative Pages) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control form-control-lg" id="factPrintCountInput" min="0" placeholder="e.g. 1540" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Counter Screenshot Photo (Optional)</label>
+                <input type="file" class="form-control" id="factPhotoInput" accept="image/png, image/jpeg, image/jpg" />
+                <div class="form-text small">Max 5 MB (PNG / JPG)</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Notes / Operational Remarks</label>
+                <input type="text" class="form-control" id="factNotesInput" placeholder="e.g. Routine weekly meter check" />
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-warning text-dark fw-bold" id="btnSaveFactCount">Save Record</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Assign Workstations & Depts -->
+  <div class="modal fade" id="manageModal" tabindex="-1" aria-labelledby="manageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold" id="manageModalLabel">Manage Departments & Domain Workstations</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <ul class="nav nav-tabs mb-3" id="manageTabs" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" id="add-pc-tab" data-bs-toggle="tab" data-bs-target="#tab-add-pc">Assign Workstation to Dept</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" id="add-dept-tab" data-bs-toggle="tab" data-bs-target="#tab-add-dept">Create New Department</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="manageTabsContent">
+            <div class="tab-pane fade show active" id="tab-add-pc">
+              <form id="formAddComputer">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Target Department</label>
+                  <select class="form-select" id="targetDeptSelect" required>
+                    <option value="" disabled selected>-- Select Department --</option>
+                  </select>
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Domain PC Hostname <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="newPcName" placeholder="e.g. FIN-PC03" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">IP Address <span class="text-muted">(Optional)</span></label>
+                    <input type="text" class="form-control" id="newPcIp" placeholder="e.g. 192.168.10.45">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">MAC Address <span class="text-muted">(Optional)</span></label>
+                    <input type="text" class="form-control" id="newPcMac" placeholder="e.g. 00-1A-2B-3C-4D-5E">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Location / Description</label>
+                  <input type="text" class="form-control" id="newPcNotes" placeholder="e.g. Assistant Accountant Desktop">
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnAddPcSubmit">
+                   Add Workstation
+                </button>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="tab-add-dept">
+              <form id="formAddDepartment">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Department Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="newDeptName" placeholder="e.g. Procurement & Inventory" required>
+                </div>
+                <button type="submit" class="btn btn-success" id="btnAddDeptSubmit">
+                   Create Department
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: PowerShell Logs -->
+  <div class="modal fade" id="logsModal" tabindex="-1" aria-labelledby="logsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold" id="logsModalLabel">
+            PowerShell Remote Execution Audit Logs
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Live activity log of Stop-Service and Start-Service remote invocations</span>
+            <button class="btn btn-sm btn-outline-secondary" id="btnRefreshLogs">
+               Refresh Logs
+            </button>
+          </div>
+          <div class="log-terminal" id="logTerminalContent">
+            <div class="text-muted">Loading audit entries...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Lightbox View Photo -->
+  <div class="modal fade" id="viewPhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold" id="viewPhotoModalLabel">
+            Printer Physical Counter Photo
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0 text-center bg-light">
+          <div class="p-3">
+            <img id="viewPhotoModalImg" src="" alt="Printer Counter Photo" class="img-fluid rounded border shadow-sm" style="max-height: 520px; object-fit: contain; width: 100%;" />
+          </div>
+          <div class="bg-white border-top p-3 text-start small">
+            <div class="row g-2">
+              <div class="col-sm-6"><strong>Department:</strong> <span id="viewPhotoModalDept">-</span></div>
+              <div class="col-sm-6"><strong>Supervisor:</strong> <span id="viewPhotoModalSupervisor">-</span></div>
+              <div class="col-sm-6"><strong>Recorded Print Count:</strong> <span id="viewPhotoModalCount" class="badge bg-success-subtle text-success border border-success-subtle px-2">-</span></div>
+              <div class="col-sm-6"><strong>Submitted At:</strong> <span id="viewPhotoModalTime" class="text-muted">-</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light d-flex justify-content-between">
+          <div>
+            <button type="button" id="viewPhotoModalDeleteBtn" class="btn btn-outline-danger btn-sm">
+               Delete Photo
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <a id="viewPhotoModalOpenBtn" href="#" target="_blank" class="btn btn-outline-secondary btn-sm">
+               Open in New Tab
+            </a>
+            <a id="viewPhotoModalDownloadBtn" href="#" download="counter_photo.jpg" class="btn btn-primary btn-sm">
+               Download Photo
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Attach / Upload Photo from Admin -->
+  <div class="modal fade" id="attachPhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold" id="attachPhotoModalLabel">
+            Attach Counter Photo
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 small mb-3">
+             Department: <strong id="attachPhotoDeptName">-</strong>
+          </div>
+          <form id="formAttachPhoto">
+            <input type="hidden" id="attachPhotoSubId" value="" />
+            <div class="mb-3">
+              <label for="adminPhotoInput" class="form-label fw-semibold">Select Photo File <span class="badge bg-secondary-subtle text-dark border ms-1">PNG / JPG, max 5 MB</span></label>
+              <input type="file" class="form-control" id="adminPhotoInput" accept="image/png, image/jpeg, image/jpg" required />
+            </div>
+            <div id="adminPhotoPreviewBox" class="text-center p-2 border rounded bg-light mb-3 d-none">
+              <img id="adminPhotoPreviewImg" src="" alt="Selected Photo" style="max-height: 180px; max-width: 100%; border-radius: 4px;" />
+              <div class="small text-muted mt-1" id="adminPhotoInfo">-</div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSaveAdminPhoto">
+                 Save Photo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- EDIT MODALS -->
+  <!-- ========================================================= -->
+
+  <!-- Modal: Edit User Modal -->
+  <div class="modal fade" id="modalEditUser" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-primary text-white">
+          <div>
+            <h5 class="modal-title fw-bold mb-0">
+              Edit User Account & Workstation
+            </h5>
+            <div class="small text-white-50">Update supervisor credentials, location, and PC hardware binding</div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="eu_feedback"></div>
+          <form id="formEditUser" novalidate>
+            <input type="hidden" id="eu_uid" value="">
+            <div class="row g-3">
+              <!-- Name -->
+              <div class="col-md-6">
+                <label for="eu_name" class="form-label fw-semibold">User Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="eu_name" required>
+              </div>
+              <!-- Email -->
+              <div class="col-md-6">
+                <label for="eu_email" class="form-label fw-semibold">Email (@malibangroup.lk)</label>
+                <input type="email" class="form-control" id="eu_email" placeholder="user@malibangroup.lk">
+              </div>
+              <!-- Location -->
+              <div class="col-md-12">
+                <label for="eu_location" class="form-label fw-semibold">Location <span class="text-danger">*</span></label>
+                <select class="form-select" id="eu_location" required>
+                  <option value="">-- Select Location --</option>
+                </select>
+              </div>
+              <!-- MAC Address -->
+              <div class="col-md-6">
+                <label for="eu_mac" class="form-label fw-semibold">MAC Address (req)</label>
+                <input type="text" class="form-control font-monospace text-uppercase" id="eu_mac" placeholder="C8-95-CE-4A-5E-B6" maxlength="17">
+              </div>
+              <!-- PC Name -->
+              <div class="col-md-6">
+                <label for="eu_pc" class="form-label fw-semibold">PC Name</label>
+                <input type="text" class="form-control font-monospace text-uppercase" id="eu_pc" placeholder="FIN-WS01">
+              </div>
+              <!-- New Password (Optional) -->
+              <div class="col-md-12">
+                <label for="eu_pass" class="form-label fw-semibold">Reset Password (Optional)</label>
+                <input type="password" class="form-control" id="eu_pass" placeholder="Leave blank to keep existing password">
+                <div class="form-text">Enter only if you wish to reset this user's login password.</div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 pt-3 mt-3 border-top">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4 fw-semibold" id="btnSubmitEditUser">
+                 Update User
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Location & Printer -->
+  <div class="modal fade" id="modalEditLocation" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-success text-white">
+          <div>
+            <h5 class="modal-title fw-bold mb-0">
+              Edit Location & Printer Hardware
+            </h5>
+            <div class="small text-white-50">Modify division part, location name, printer model or serial number</div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="el_feedback"></div>
+          <form id="formEditLocation" novalidate>
+            <input type="hidden" id="el_original_name" value="">
+            
+            <!-- Company Part -->
+            <div class="mb-3">
+              <label for="el_branch" class="form-label fw-semibold">
+                 Company Part / Division <span class="text-danger">*</span>
+              </label>
+              <select class="form-select fw-semibold" id="el_branch" required>
+                <option value="Little Lion 105">Little Lion 105</option>
+                <option value="Little Lion 11">Little Lion 11</option>
+                <option value="Kandawala">Kandawala</option>
+              </select>
+            </div>
+
+            <!-- Location Name -->
+            <div class="mb-3">
+              <label for="el_name" class="form-label fw-semibold">
+                 Location Name / Area <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="el_name" required>
+            </div>
+
+            <!-- Printer Model -->
+            <div class="mb-3">
+              <label for="el_model" class="form-label fw-semibold">
+                 Printer Model <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="el_model" required>
+            </div>
+
+            <!-- Serial Number -->
+            <div class="mb-4">
+              <label for="el_serial" class="form-label fw-semibold">
+                 Hardware Serial Number <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control font-monospace text-uppercase" id="el_serial" required>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success px-4 fw-semibold" id="btnSubmitEditLocation">
+                 Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Right-Click Context Menu for Counter Photo -->
+  <div id="photoContextMenu" class="dropdown-menu shadow-lg border-0 py-2" style="position: fixed; z-index: 1070; display: none;">
+    <div class="px-3 py-1 small text-muted fw-bold border-bottom mb-1">
+       Counter Photo Options
+    </div>
+    <button type="button" class="dropdown-item d-flex align-items-center py-2" id="ctxViewPhoto">
+       View Full Photo (Lightbox)
+    </button>
+    <a class="dropdown-item d-flex align-items-center py-2" id="ctxOpenNewTab" href="#" target="_blank">
+       Open in New Tab
+    </a>
+    <a class="dropdown-item d-flex align-items-center py-2" id="ctxDownloadPhoto" href="#" download>
+       Download Photo
+    </a>
+    <div class="dropdown-divider my-1"></div>
+    <button type="button" class="dropdown-item d-flex align-items-center py-2 text-danger fw-semibold" id="ctxDeletePhoto">
+       Delete Counter Photo
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container-fluid px-4">
+      <div>Maliban IT Infrastructure &copy; 2026 | Automated Print Spooler Domain Governance</div>
+      <div class="text-muted small">PowerShell Command: Invoke-Command -ComputerName &lt;PC_Name&gt; -ScriptBlock { ... }</div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jsPDF & AutoTable for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- SheetJS (XLSX) for client-side Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Admin Client JS -->
+  <script src="js/admin.js?v=3.6"></script>
+</body>
+</html>

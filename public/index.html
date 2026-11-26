@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supervisor Portal - Weekly Printer Count Submission</title>
+  <!-- Browser Tab Favicon (Little Lion Corporate Printer Icon) -->
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/favicon.png">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar (Single Unified Header Bar) -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container-fluid px-4">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <a class="navbar-brand py-1 me-2" href="/">
+          <div class="navbar-brand-logo">
+            <img src="images/little-lion-logo.png" alt="Little Lion Logo">
+          </div>
+        </a>
+        
+        <!-- Reporting Cycle & Deadline combined into Top Bar -->
+        <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="text-white-50 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Current Reporting Cycle:</span>
+            <span class="fw-bold text-white fs-6" id="weekRangeDisplay">Loading active week...</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
+            <span class="text-white-50" style="font-size: 0.75rem;">Weekly Submission Deadline:</span>
+            <span class="fw-bold text-white" style="font-size: 0.8rem;" id="deadlineDisplay">Monday, 02:00 PM</span>
+            <span id="deadlineStatusBadge" class="ms-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center ms-auto">
+        <div class="d-none" id="navUserBadgeItem">
+          <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-25 px-3 py-1 rounded-pill border border-white border-opacity-25 text-white">
+            <div class="small lh-1 text-start">
+              <div class="fw-bold" id="navUserName">User Name</div>
+              <div class="text-white-50" style="font-size: 0.72rem;" id="navUserPc">PC-NAME</div>
+            </div>
+            <button class="btn btn-sm btn-outline-light border-0 ms-2 py-0 px-2 fw-semibold" id="btnLogout" title="Log Out" style="font-size: 0.75rem;">
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container py-4 flex-grow-1">
+
+    <!-- Alert / Toast placeholder for dynamic feedback -->
+    <div id="feedbackContainer"></div>
+
+    <!-- ========================================================= -->
+    <!-- AUTHENTICATION LOGIN CARD (Visible when not logged in) -->
+    <!-- ========================================================= -->
+    <div class="row justify-content-center" id="loginCardContainer">
+      <div class="col-lg-6 col-md-8">
+        <div class="card main-card shadow-lg border-0">
+          <div class="card-header-custom text-center py-4 bg-primary text-white">
+            
+            <h4 class="fw-bold mb-1">Supervisor Portal Authentication</h4>
+            <p class="small text-white-50 mb-0">Sign in with your User Master account or PC credentials to record print counts.</p>
+          </div>
+          <div class="card-body p-4 p-md-5">
+            <div id="loginFeedback"></div>
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="loginIdentifier" class="form-label fw-semibold">
+                   User Name or Registered PC Name
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control form-control-lg" 
+                  id="loginIdentifier" 
+                  placeholder="Enter your Name, PC Name, or Email"
+                  required
+                >
+                <div class="form-text">Enter your Name or Registered Computer Name from User Master.</div>
+              </div>
+
+              <div class="mb-4">
+                <label for="loginPassword" class="form-label fw-semibold">
+                   Password
+                </label>
+                <input 
+                  type="password" 
+                  class="form-control form-control-lg" 
+                  id="loginPassword" 
+                  placeholder="••••••••"
+                  required
+                >
+              </div>
+
+              <div class="d-grid mb-0">
+                <button type="submit" class="btn btn-primary-custom btn-lg py-3 fw-bold" id="btnLogin">
+                   Log In to Portal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SUPERVISOR SUBMISSION FORM (Visible when logged in) -->
+    <!-- ========================================================= -->
+    <div class="row justify-content-center d-none" id="submissionContainer">
+      <div class="col-lg-8">
+        
+        <!-- User Welcome Banner -->
+        <div class="card border-0 shadow-sm mb-4 bg-primary text-white p-3">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 bg-white bg-opacity-25 rounded-circle text-warning fs-3">
+                
+              </div>
+              <div>
+                <div class="fw-bold fs-5" id="userWelcomeName">Welcome, Supervisor</div>
+                <div class="small text-white-70">
+                  <span id="userWelcomeDept" class="badge bg-light text-dark me-2">Department</span>
+                  <span id="userWelcomePc" class="badge bg-dark bg-opacity-50 me-2">PC: ...</span>
+                  <span id="userWelcomeMac" class="badge bg-dark bg-opacity-25">MAC: ...</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-outline-light btn-sm fw-semibold" id="btnSwitchUser">
+                 Switch Account
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card main-card">
+          <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-1 text-dark fw-bold">Weekly Print Count Input Form</h5>
+              <p class="text-muted small mb-0">Records print count to Fact Table (fact_printer_count) and manages domain spooler state.</p>
+            </div>
+            <span class="badge bg-light text-dark border p-2" id="formStatusBadge">
+               Domain Synced
+            </span>
+          </div>
+          <div class="card-body p-4">
+
+            <form id="submissionForm">
+              <!-- Hidden departmentSelect for backend backward compatibility -->
+              <select class="d-none" id="departmentSelect">
+                <option value="" selected disabled>-- Department ID --</option>
+              </select>
+
+              <!-- 1. Plant Location & Company Division -->
+              <div class="mb-3">
+                <label for="locationSelect" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                  <span> Plant Location & Division <span class="text-danger">*</span></span>
+                  <span class="badge bg-primary-subtle text-primary border" id="locationBranchBadge">Company Division</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-light text-primary"></span>
+                  <select class="form-select form-select-lg fw-semibold" id="locationSelect" required>
+                    <option value="" selected disabled>-- Select Plant / Floor Location --</option>
+                  </select>
+                </div>
+                <div class="form-text">Assigned location for reporting weekly print volume. Auto-selected from your profile.</div>
+              </div>
+
+              <!-- 2. Assigned Printer Hardware & Spooler Status Card -->
+              <div id="printerDetailsCard" class="card border mb-3 shadow-sm bg-light">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="p-2 bg-primary text-white rounded"></span>
+                      <div>
+                        <div class="small text-muted fw-semibold">ASSIGNED HARDWARE PRINTER</div>
+                        <div class="fw-bold fs-6 text-dark" id="displayPrinterModel">Loading Printer...</div>
+                      </div>
+                    </div>
+                    <div class="text-end">
+                      <div class="small text-muted fw-semibold">SERIAL NUMBER</div>
+                      <span class="badge bg-dark font-monospace px-2 py-1 fs-6" id="displayPrinterSerial">S/N: ----</span>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2 flex-wrap gap-2">
+                    <div class="small text-muted">
+                       Print Spooler: 
+                      <span id="displaySpoolerStatus" class="badge bg-success">ACTIVE</span>
+                    </div>
+                    <div class="small text-muted" id="displayWorkstationsSummary">
+                       Workstations: <span>0 Registered</span>
+                    </div>
+                  </div>
+
+                  <!-- Active Submission Notification for this week -->
+                  <div id="deptSubmissionNotice" class="small mt-2 pt-2 border-top text-muted d-none"></div>
+                </div>
+              </div>
+
+              <!-- 3. Reporting Workstation (Dual-Tracking by PC Name & MAC Address) -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label for="supervisorName" class="form-label fw-semibold">
+                     Supervisor Name <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"></span>
+                    <input type="text" class="form-control" id="supervisorName" readonly required>
+                  </div>
+                  <div class="form-text">Reporting user (@malibangroup.lk).</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="pcSelect" class="form-label fw-semibold d-flex justify-content-between align-items-center">
+                    <span> Reporting Workstation <span class="text-danger">*</span></span>
+                    <span class="badge bg-info-subtle text-primary border small" id="macTrackedBadge">
+                      MAC Tracked
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"></span>
+                    <select class="form-select" id="pcSelect" required>
+                      <option value="" selected disabled>-- Select Reporting PC --</option>
+                    </select>
+                  </div>
+                  <div class="form-text" id="pcDetailsText">Dual-tracked by PC Name & physical MAC address.</div>
+                </div>
+              </div>
+
+              <!-- 4. Total Print Count for the Week -->
+              <div class="mb-3">
+                <label for="printCount" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                  <span> Weekly Page Counter Reading <span class="text-danger">*</span></span>
+                  <span class="badge bg-secondary-subtle text-dark border" id="previousCountBadge">Previous: --</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-light text-primary"></span>
+                  <input 
+                    type="number" 
+                    class="form-control form-control-lg fw-bold fs-4 text-primary" 
+                    id="printCount" 
+                    placeholder="e.g. 15420" 
+                    min="0" 
+                    step="1"
+                    required
+                  >
+                  <span class="input-group-text bg-light fw-semibold">Pages</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <div class="form-text">Read from printer physical counter or web management console.</div>
+                  <div class="small fw-semibold text-muted" id="usageDeltaText"></div>
+                </div>
+              </div>
+
+              <!-- 5. Counter Photo / Screenshot Upload (5 MB limit, PNG / JPG) -->
+              <div class="mb-3 position-relative">
+                <label for="screenshotFile" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                  <span> Physical Counter Photo / Screenshot</span>
+                  <span class="badge bg-secondary-subtle text-dark border">Max: 5 MB (PNG / JPG)</span>
+                </label>
+                
+                <input 
+                  type="file" 
+                  class="form-control" 
+                  id="screenshotFile" 
+                  accept="image/png, image/jpeg, image/jpg"
+                >
+                <div class="form-text">
+                  Attach photo of printer counter display (PNG or JPG, max 5 MB). 
+                  <span class="text-primary fw-semibold">Right-click on preview image to delete or change.</span>
+                </div>
+
+                <!-- Live Photo Preview Box with Right-Click Context Menu Support -->
+                <div id="photoPreviewContainer" class="mt-2 d-none">
+                  <div class="d-flex align-items-center gap-3 p-2 border rounded bg-white shadow-sm" id="photoPreviewCard">
+                    <div class="position-relative" style="cursor: pointer;" title="Right-click for options" id="photoPreviewImgWrapper">
+                      <img id="photoPreviewImg" src="" alt="Counter Preview" style="height: 70px; width: 95px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;" />
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" id="btnBadgeRemovePhoto" title="Delete image" style="cursor: pointer;">
+                        
+                      </span>
+                    </div>
+                    <div class="flex-grow-1 small">
+                      <div class="fw-bold text-truncate" id="photoFileName" style="max-width: 250px;">counter.png</div>
+                      <div class="text-muted" id="photoFileSize">1.2 MB</div>
+                      <div class="text-primary" style="font-size: 0.75rem;">Right-click image to delete or change</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger px-3" id="btnRemovePhoto" title="Delete photo">
+                       Delete Photo
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Existing Photo Notice (for current week) -->
+                <div id="existingPhotoContainer" class="mt-2 d-none">
+                  <div class="d-flex align-items-center justify-content-between p-2 rounded bg-info-subtle border border-info-subtle" id="existingPhotoCard">
+                    <div class="d-flex align-items-center gap-2">
+                      <img id="existingPhotoThumb" src="" alt="Existing Photo" style="height: 45px; width: 60px; object-fit: cover; border-radius: 4px; cursor: pointer;" title="Right-click to delete image" />
+                      <div class="small">
+                        <span class="fw-bold text-dark"> Current Counter Photo Attached</span>
+                        <div><a id="existingPhotoLink" href="#" target="_blank" class="fw-semibold text-decoration-underline">View Full Size Photo</a></div>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnDeleteExistingPhoto" title="Delete photo from submission">
+                       Delete Existing Photo
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Custom Context Menu for Image Right-Click -->
+                <div id="imageContextMenu" class="dropdown-menu shadow border-0" style="position: absolute; display: none; z-index: 1060;">
+                  <button type="button" class="dropdown-item text-danger py-2" id="ctxDeletePhoto">
+                     <strong>Delete / Remove Image</strong>
+                  </button>
+                  <button type="button" class="dropdown-item py-2" id="ctxChangePhoto">
+                     Choose Another Image
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item py-2" href="#" id="ctxViewPhoto" target="_blank">
+                     View Full Size
+                  </a>
+                </div>
+
+              </div>
+
+              <!-- 6. Remarks / Notes -->
+              <div class="mb-4">
+                <label for="submissionNotes" class="form-label fw-semibold">
+                  Remarks / Notes <span class="text-muted small fw-normal">(Optional)</span>
+                </label>
+                <textarea 
+                  class="form-control" 
+                  id="submissionNotes" 
+                  rows="2" 
+                  placeholder="Optional notes: e.g. Toner cartridge replaced, drum maintenance completed, bulk packing batch run."
+                ></textarea>
+              </div>
+
+              <!-- 7. Submit Action Button -->
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary-custom btn-lg py-3 fw-bold" id="submitBtn">
+                   Submit Weekly Print Count & Activate Spooler
+                </button>
+              </div>
+
+              <!-- Re-enter Option Container (Visible when count is locked) -->
+              <div id="reenterHelpContainer" class="text-center mt-3 pt-2 border-top d-none">
+                <span class="text-muted small"><i class="bi bi-question-circle me-1"></i>Entered an incorrect counter reading? </span>
+                <button type="button" class="btn btn-link text-danger fw-semibold small p-0 text-decoration-none" id="btnLinkReenter">
+                  <i class="bi bi-trash3 me-1"></i>Delete incorrect count &amp; re-enter
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+          <div class="card-footer bg-light p-3 small text-muted d-flex align-items-center justify-content-between">
+            <div>
+               
+              <strong>Automatic Unblock:</strong> Submitting weekly count immediately records to Fact Table (fact_printer_count) and triggers WinRM PowerShell spooler activation on departmental PCs.
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Submissions History for Department -->
+        <div class="card border-0 shadow-sm mt-4">
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0 text-dark">
+              Recent Print Count Submissions (Fact Table)
+            </h6>
+            <span class="badge bg-secondary-subtle text-secondary" id="historyCountBadge">0 Records</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Department</th>
+                  <th>Printer / Location</th>
+                  <th>Count</th>
+                  <th>Submitted By</th>
+                  <th>Photo</th>
+                </tr>
+              </thead>
+              <tbody id="userRecentFactTableBody">
+                <tr>
+                  <td colspan="6" class="text-center py-3 text-muted">No recent submissions found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: Supervisor Self-Registration & Workstation Tracking -->
+  <div class="modal fade" id="modalSupervisorRegister" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-success text-white">
+          <div>
+            <h5 class="modal-title fw-bold mb-0">
+              New User Registration & PC Tracking
+            </h5>
+            <div class="small text-white-50">Create your account and register workstation with PC Name & MAC Address</div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Auto-detect Banner -->
+          <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 d-flex justify-content-between align-items-center mb-4 py-2 px-3 rounded-3">
+            <div class="small">
+              
+              <strong>Auto-Detect:</strong> Retrieve your PC Name & MAC Address automatically.
+            </div>
+            <button type="button" class="btn btn-sm btn-success" id="reg_btnAutoDetect">
+               Auto-Detect My PC & MAC
+            </button>
+          </div>
+
+          <div id="reg_feedback"></div>
+
+          <form id="formSupervisorRegister" novalidate>
+            <div class="row g-3">
+              <!-- 1. User Name -->
+              <div class="col-md-6">
+                <label for="reg_name" class="form-label fw-semibold">
+                   User Name <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="reg_name" placeholder="e.g. Nirmal Fernando" required>
+              </div>
+
+              <!-- 2. Email (@malibangroup.lk) -->
+              <div class="col-md-6">
+                <label for="reg_email" class="form-label fw-semibold">
+                   Email (@malibangroup.lk) <span class="text-danger">*</span>
+                </label>
+                <input type="email" class="form-control" id="reg_email" placeholder="username@malibangroup.lk" required>
+                <div class="form-text">Must end with @malibangroup.lk</div>
+              </div>
+
+              <!-- 3. Location (Select Option) -->
+              <div class="col-md-12">
+                <label for="reg_location" class="form-label fw-semibold">
+                   Location <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="reg_location" required>
+                  <option value="">-- Select Location Name --</option>
+                </select>
+                <div class="form-text">Choose your plant, factory floor or office location.</div>
+              </div>
+
+              <!-- 4. MAC Address (req) -->
+              <div class="col-md-6">
+                <label for="reg_mac" class="form-label fw-semibold">
+                   MAC Address (req) <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control font-monospace" id="reg_mac" placeholder="e.g. C8-95-CE-4A-5E-B6" maxlength="17" required>
+                <div class="form-text">Workstation physical MAC address.</div>
+              </div>
+
+              <!-- 5. PC Name -->
+              <div class="col-md-6">
+                <label for="reg_pc" class="form-label fw-semibold">
+                   PC Name <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control font-monospace" id="reg_pc" placeholder="e.g. PC-NAME-01" required>
+                <div class="form-text">Windows Computer Name.</div>
+              </div>
+
+              <!-- 6. Password -->
+              <div class="col-md-6">
+                <label for="reg_pass" class="form-label fw-semibold">
+                   Password <span class="text-danger">*</span>
+                </label>
+                <input type="password" class="form-control" id="reg_pass" placeholder="Minimum 4 characters" minlength="4" required>
+              </div>
+
+              <!-- 7. re-Enter Password -->
+              <div class="col-md-6">
+                <label for="reg_repass" class="form-label fw-semibold">
+                   re-Enter Password <span class="text-danger">*</span>
+                </label>
+                <input type="password" class="form-control" id="reg_repass" placeholder="Re-type password" required>
+                <div id="reg_pass_match_indicator" class="small mt-1"></div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+              <span class="text-muted small"> Tracked by PC Name & MAC Address</span>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success px-4 fw-semibold" id="btnSubmitSupervisorRegister">
+                   Complete Registration
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container">
+      <div>Maliban IT Infrastructure &copy; 2026 | Automated Print Spooler Domain Governance</div>
+      <div class="text-muted small">Powered by Node.js, SQLite, and PowerShell WinRM Automation</div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Supervisor Form Client JS -->
+  <script src="js/supervisor.js?v=3.6"></script>
+</body>
+</html>
