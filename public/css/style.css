@@ -38,9 +38,11 @@ body {
 body.login-page-active {
   background-color: #001633;
   background: 
-    linear-gradient(180deg, rgba(0, 22, 51, 0.12) 0%, rgba(255, 255, 255, 0.02) 20%, rgba(0, 0, 0, 0.04) 75%, rgba(0, 22, 51, 0.35) 100%),
-    url('../images/login-bg.jpg') no-repeat center bottom fixed !important;
+    linear-gradient(180deg, rgba(0, 22, 51, 0.10) 0%, rgba(255, 255, 255, 0.02) 20%, rgba(0, 0, 0, 0.04) 75%, rgba(0, 22, 51, 0.35) 100%),
+    url('../images/login-bg.jpg?v=2.0') no-repeat center bottom fixed !important;
   background-size: cover !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   min-height: 100vh;
 }
 
