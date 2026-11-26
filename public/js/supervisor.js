@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // AUTHENTICATION LOGIC (USER MASTER)
   // ==========================================
   function initAuth() {
+    loadWeekInfo();
     const savedUserJson = localStorage.getItem('maliban_user');
     if (savedUserJson) {
       try {
@@ -1317,6 +1318,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Handle supervisor tab nav clicks (smooth scrolling & active state)
+  const supervisorNavLinks = document.querySelectorAll('#supervisorTabNav .nav-link');
+  supervisorNavLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      supervisorNavLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      const targetId = link.getAttribute('href');
+      if (targetId && targetId.startsWith('#')) {
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
 
   // Initialize
   initAuth();

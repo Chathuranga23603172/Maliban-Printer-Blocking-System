@@ -32,14 +32,16 @@ body {
 }
 
 /* ========================================================
-   1. NAVIGATION BAR (Dark Blue with Red Accent Line)
+   1. NAVIGATION BAR - LINE 1 (Corporate Dark Blue with Red Accent Line)
    ======================================================== */
 .navbar-custom {
-  background: linear-gradient(135deg, #001c44 0%, #002b66 60%, #0d3a78 100%);
-  border-bottom: 3.5px solid #d9252c;
-  box-shadow: 0 4px 14px rgba(0, 28, 68, 0.35);
-  padding-top: 6px;
-  padding-bottom: 6px;
+  background: linear-gradient(135deg, #001633 0%, #00285a 50%, #06346e 100%) !important;
+  border-bottom: 3.5px solid #d9252c !important;
+  box-shadow: 0 4px 18px rgba(0, 24, 60, 0.35) !important;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  position: relative;
+  z-index: 1020;
 }
 
 .navbar-brand {
@@ -52,20 +54,21 @@ body {
 .navbar-brand-logo {
   background: #ffffff;
   padding: 6px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .navbar-brand-logo:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.32);
 }
 
 .navbar-brand-logo img {
-  height: 75px;
+  height: 52px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -79,16 +82,19 @@ body {
 }
 
 .navbar-title-wrap .title-text {
-  font-size: 1.15rem;
+  font-size: 1.18rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.25;
+  letter-spacing: 0.25px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-title-wrap .subtitle-text {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.82rem;
+  color: rgba(226, 232, 240, 0.92);
   line-height: 1.25;
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
@@ -122,65 +128,94 @@ body {
   background-color: rgba(255, 255, 255, 0.12);
 }
 
-.navbar-custom .nav-link.active {
-  color: #ffffff !important;
-  background-color: #d9252c !important;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(217, 37, 44, 0.4);
-}
-
+.navbar-custom .btn-outline-light,
 #btnRefresh {
-  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.75) !important;
   color: #ffffff !important;
   font-weight: 600;
   border-radius: 6px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  padding: 6px 16px;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
+.navbar-custom .btn-outline-light:hover,
 #btnRefresh:hover {
   background: #d9252c !important;
   border-color: #d9252c !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(217, 37, 44, 0.4);
+  box-shadow: 0 4px 12px rgba(217, 37, 44, 0.45);
+  transform: translateY(-1px);
 }
 
 /* ========================================================
-   2. MAIN TAB NAVIGATION & CONTROLS
+   2. SUB-NAVIGATION BAR - LINE 2 (Tabs & Navigation Pills)
    ======================================================== */
 .admin-tab-nav {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px rgba(0, 43, 102, 0.06);
-  border: 1px solid #e2e8f0;
+  background: #ffffff !important;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 43, 102, 0.05);
+  border: 1px solid #e2e8f0 !important;
+}
+
+.admin-tab-nav .nav-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .admin-tab-nav .nav-link {
   font-weight: 600;
-  font-size: 0.95rem;
-  color: #334155;
-  border-radius: 8px;
-  padding: 10px 22px;
+  font-size: 0.92rem;
+  color: #334155 !important;
+  border-radius: 6px;
+  padding: 9px 20px;
   transition: all 0.2s ease-in-out;
-  border: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.admin-tab-nav .nav-link i {
+  color: #64748b;
+  transition: color 0.2s ease;
 }
 
 .admin-tab-nav .nav-link:hover {
-  background-color: #eef4fc;
-  color: #002b66;
-  border-color: #cbdcf7;
+  background-color: #eff6ff !important;
+  color: #002b66 !important;
+  border-color: #bfdbfe !important;
+  transform: translateY(-1px);
 }
 
+.admin-tab-nav .nav-link:hover i {
+  color: #002b66;
+}
+
+/* Active Tab Style - Premium Navy with Red Accent Bottom Border */
 .admin-tab-nav .nav-link.active,
+.admin-tab-nav .nav-link.active:focus,
+.admin-tab-nav .nav-link.active:hover,
 .admin-tab-nav #tab-governance-btn.active,
 .admin-tab-nav #tab-locations-btn.active,
-.admin-tab-nav #tab-users-btn.active {
-  background-color: #002b66 !important;
+.admin-tab-nav #tab-users-btn.active,
+.admin-tab-nav #tab-monthly-report-btn.active,
+.admin-tab-nav #tab-weekly-input-btn.active {
+  background: #002b66 !important;
   color: #ffffff !important;
   border-color: #001c44 !important;
   border-bottom: 3.5px solid #d9252c !important;
   box-shadow: 0 4px 12px rgba(0, 43, 102, 0.28) !important;
+  transform: translateY(-1px);
+}
+
+.admin-tab-nav .nav-link.active i {
+  color: #ffffff !important;
 }
 
 /* ========================================================
