@@ -16,79 +16,80 @@
 </head>
 <body>
 
-  <!-- Navigation Bar - Line 1: Corporate Top Header -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <div class="container-fluid px-4">
-      <div class="d-flex align-items-center">
-        <a class="navbar-brand py-1 me-3" href="/admin">
-          <div class="navbar-brand-logo">
-            <img src="images/little-lion-logo.png" alt="Little Lion Logo">
+  <!-- Unified 2-in-1 Corporate Navigation Bar -->
+  <header class="navbar-2in1">
+    <!-- Tier 1: Corporate Top Header (Dark Blue) -->
+    <div class="navbar-2in1-top">
+      <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          
+          <div class="d-flex align-items-center">
+            <a class="navbar-brand py-1 me-3" href="/admin">
+              <div class="navbar-brand-logo">
+                <img src="images/little-lion-logo.png" alt="Little Lion Logo">
+              </div>
+            </a>
+            <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
+              <div class="title-text d-flex align-items-center">
+                <span>Maliban Print Governance &amp; Warehouse Admin</span>
+              </div>
+              <div class="subtitle-text mt-1" id="currentWeekSubtitle">
+                Active cycle starting Monday. Enforcement runs Mondays at 2:00 PM.
+              </div>
+            </div>
           </div>
-        </a>
-        <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
-          <div class="title-text d-flex align-items-center">
-            <span>Maliban Print Governance &amp; Warehouse Admin</span>
-          </div>
-          <div class="subtitle-text mt-1" id="currentWeekSubtitle">
-            Active cycle starting Monday. Enforcement runs Mondays at 2:00 PM.
-          </div>
-        </div>
-      </div>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="adminNav">
-        <ul class="navbar-nav ms-auto align-items-center gap-2">
-          <li class="nav-item">
+
+          <div class="d-flex align-items-center gap-2">
             <a href="/" class="btn btn-outline-light btn-sm px-3 fw-semibold d-flex align-items-center" title="Switch to Supervisor Portal">
               <i class="bi bi-speedometer2 me-1"></i> Supervisor Portal
             </a>
-          </li>
-          <li class="nav-item">
             <button class="btn btn-outline-light btn-sm px-3 fw-semibold d-flex align-items-center" id="btnRefresh">
               <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
             </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+          </div>
 
-  <!-- Main Container -->
-  <main class="container-fluid px-4 py-3 flex-grow-1">
-
-    <!-- Main Navigation Bar - Line 2: Tabs (Navbar Style) -->
-    <div class="card shadow-sm border-0 mb-4 bg-white admin-tab-nav">
-      <div class="card-body p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <ul class="nav nav-pills gap-2 flex-wrap mb-0" id="adminMainTabNav" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active d-flex align-items-center" id="tab-governance-btn" data-bs-toggle="pill" data-bs-target="#tab-governance" type="button" role="tab" aria-selected="true">
-              <i class="bi bi-shield-check me-2"></i> Spooler Governance &amp; Compliance
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link d-flex align-items-center" id="tab-locations-btn" data-bs-toggle="pill" data-bs-target="#tab-locations" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-geo-alt me-2"></i> Location
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link d-flex align-items-center" id="tab-users-btn" data-bs-toggle="pill" data-bs-target="#tab-users" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-people me-2"></i> Users
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link d-flex align-items-center fw-semibold" id="tab-monthly-report-btn" data-bs-toggle="pill" data-bs-target="#tab-monthly-report" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-file-earmark-bar-graph me-2"></i> Monthly Usage Report
-            </button>
-          </li>
-        </ul>
-        <div class="d-none d-md-flex align-items-center gap-2 pe-1">
-          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
-            <i class="bi bi-check2-circle me-1"></i> Domain Synced
-          </span>
         </div>
       </div>
     </div>
+
+    <!-- Tier 2: Sub-Nav Tab Row (Seamlessly Attached) -->
+    <div class="navbar-2in1-bottom">
+      <div class="container-fluid px-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 py-2">
+          <ul class="nav nav-pills gap-2 flex-wrap mb-0" id="adminMainTabNav" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active d-flex align-items-center" id="tab-governance-btn" data-bs-toggle="pill" data-bs-target="#tab-governance" type="button" role="tab" aria-selected="true">
+                <i class="bi bi-shield-check me-2"></i> Spooler Governance &amp; Compliance
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link d-flex align-items-center" id="tab-locations-btn" data-bs-toggle="pill" data-bs-target="#tab-locations" type="button" role="tab" aria-selected="false">
+                <i class="bi bi-geo-alt me-2"></i> Location
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link d-flex align-items-center" id="tab-users-btn" data-bs-toggle="pill" data-bs-target="#tab-users" type="button" role="tab" aria-selected="false">
+                <i class="bi bi-people me-2"></i> Users
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link d-flex align-items-center fw-semibold" id="tab-monthly-report-btn" data-bs-toggle="pill" data-bs-target="#tab-monthly-report" type="button" role="tab" aria-selected="false">
+                <i class="bi bi-file-earmark-bar-graph me-2"></i> Monthly Usage Report
+              </button>
+            </li>
+          </ul>
+          <div class="d-none d-md-flex align-items-center gap-2 pe-1">
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+              <i class="bi bi-check2-circle me-1"></i> Domain Synced
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container-fluid px-4 py-4 flex-grow-1">
 
     <!-- Feedback Toast/Alert placeholder -->
     <div id="adminAlertContainer"></div>

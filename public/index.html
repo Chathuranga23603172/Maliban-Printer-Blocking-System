@@ -16,79 +16,86 @@
 </head>
 <body>
 
-  <!-- Navigation Bar - Line 1: Corporate Top Header -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <div class="container-fluid px-4">
-      <div class="d-flex align-items-center">
-        <a class="navbar-brand py-1 me-3" href="/">
-          <div class="navbar-brand-logo">
-            <img src="images/little-lion-logo.png" alt="Little Lion Logo">
-          </div>
-        </a>
-        <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
-          <div class="title-text d-flex align-items-center">
-            <span>Maliban Print Governance &amp; Supervisor Portal</span>
-          </div>
-          <div class="subtitle-text mt-1">
-            Weekly Print Count Recording, Star Schema Audits &amp; Domain Spooler Management
-          </div>
-        </div>
-      </div>
-
-      <div class="d-flex align-items-center ms-auto gap-2">
-        <div class="d-none" id="navUserBadgeItem">
-          <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-25 px-3 py-1 rounded-pill border border-white border-opacity-25 text-white">
-            <div class="small lh-1 text-start">
-              <div class="fw-bold" id="navUserName">User Name</div>
-              <div class="text-white-50" style="font-size: 0.72rem;" id="navUserPc">PC-NAME</div>
+  <!-- Unified 2-in-1 Corporate Navigation Bar -->
+  <header class="navbar-2in1">
+    <!-- Tier 1: Corporate Top Header (Dark Blue) -->
+    <div class="navbar-2in1-top">
+      <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          
+          <div class="d-flex align-items-center">
+            <a class="navbar-brand py-1 me-3" href="/">
+              <div class="navbar-brand-logo">
+                <img src="images/little-lion-logo.png" alt="Little Lion Logo">
+              </div>
+            </a>
+            <div class="navbar-title-wrap border-start border-white border-opacity-25 ps-3 text-white">
+              <div class="title-text d-flex align-items-center">
+                <span>Maliban Print Governance &amp; Supervisor Portal</span>
+              </div>
+              <div class="subtitle-text mt-1">
+                Weekly Print Count Recording, Star Schema Audits &amp; Domain Spooler Management
+              </div>
             </div>
-            <button class="btn btn-sm btn-outline-light border-0 ms-2 py-0 px-2 fw-semibold" id="btnLogout" title="Log Out" style="font-size: 0.75rem;">
-              Log Out
-            </button>
           </div>
-        </div>
-        <a href="/admin" class="btn btn-outline-light btn-sm px-3 fw-semibold d-flex align-items-center" title="Go to IT Admin Portal">
-          <i class="bi bi-shield-lock me-1"></i> Admin Portal
-        </a>
-      </div>
-    </div>
-  </nav>
 
-  <!-- Navigation Bar - Line 2: Sub-Nav Container Card -->
-  <div class="container-fluid px-4 pt-3">
-    <div class="card shadow-sm border-0 bg-white admin-tab-nav">
-      <div class="card-body p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <ul class="nav nav-pills gap-2 flex-wrap mb-0" id="supervisorTabNav" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active d-flex align-items-center" href="#submissionForm" id="tab-weekly-input-btn">
-              <i class="bi bi-speedometer2 me-2"></i> Weekly Print Count Input
+          <div class="d-flex align-items-center gap-2">
+            <div class="d-none" id="navUserBadgeItem">
+              <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-25 px-3 py-1 rounded-pill border border-white border-opacity-25 text-white">
+                <div class="small lh-1 text-start">
+                  <div class="fw-bold" id="navUserName">User Name</div>
+                  <div class="text-white-50" style="font-size: 0.72rem;" id="navUserPc">PC-NAME</div>
+                </div>
+                <button class="btn btn-sm btn-outline-light border-0 ms-2 py-0 px-2 fw-semibold" id="btnLogout" title="Log Out" style="font-size: 0.75rem;">
+                  Log Out
+                </button>
+              </div>
+            </div>
+            <a href="/admin" class="btn btn-outline-light btn-sm px-3 fw-semibold d-flex align-items-center" title="Go to IT Admin Portal">
+              <i class="bi bi-shield-lock me-1"></i> Admin Portal
             </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link d-flex align-items-center" href="#printerDetailsCard" id="tab-hardware-btn">
-              <i class="bi bi-printer me-2"></i> Location &amp; Hardware
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link d-flex align-items-center" href="#recentAuditCard" id="tab-history-btn">
-              <i class="bi bi-clock-history me-2"></i> Recent Submission History
-            </a>
-          </li>
-        </ul>
-        <div class="d-flex align-items-center gap-2 flex-wrap pe-2">
-          <div class="small text-secondary d-none d-lg-block">
-            <span class="text-muted fw-semibold">Cycle:</span>
-            <span class="fw-bold text-dark" id="weekRangeDisplay">Loading active week...</span>
           </div>
-          <div class="small text-secondary d-none d-sm-block">
-            <span class="text-muted fw-semibold">Deadline:</span>
-            <span class="fw-bold text-dark" id="deadlineDisplay">Monday, 02:00 PM</span>
-          </div>
-          <span id="deadlineStatusBadge"></span>
+
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Tier 2: Sub-Nav Tab Row (Seamlessly Attached) -->
+    <div class="navbar-2in1-bottom">
+      <div class="container-fluid px-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 py-2">
+          <ul class="nav nav-pills gap-2 flex-wrap mb-0" id="supervisorTabNav" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active d-flex align-items-center" href="#submissionForm" id="tab-weekly-input-btn">
+                <i class="bi bi-speedometer2 me-2"></i> Weekly Print Count Input
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center" href="#printerDetailsCard" id="tab-hardware-btn">
+                <i class="bi bi-printer me-2"></i> Location &amp; Hardware
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center" href="#recentAuditCard" id="tab-history-btn">
+                <i class="bi bi-clock-history me-2"></i> Recent Submission History
+              </a>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center gap-2 flex-wrap pe-1">
+            <div class="small text-secondary d-none d-lg-block">
+              <span class="text-muted fw-semibold">Cycle:</span>
+              <span class="fw-bold text-dark" id="weekRangeDisplay">Loading active week...</span>
+            </div>
+            <div class="small text-secondary d-none d-sm-block">
+              <span class="text-muted fw-semibold">Deadline:</span>
+              <span class="fw-bold text-dark" id="deadlineDisplay">Monday, 02:00 PM</span>
+            </div>
+            <span id="deadlineStatusBadge"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
   <!-- Main Content -->
   <main class="container py-4 flex-grow-1">
