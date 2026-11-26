@@ -32,6 +32,41 @@ body {
 }
 
 /* ========================================================
+   LOGIN PAGE BACKGROUND (Little Lion Milky Cookies Theme)
+   Clear, vibrant, and high-definition photo background
+   ======================================================== */
+body.login-page-active {
+  background: 
+    linear-gradient(180deg, rgba(0, 22, 51, 0.35) 0%, rgba(0, 0, 0, 0.04) 25%, rgba(0, 0, 0, 0.04) 75%, rgba(0, 18, 42, 0.5) 100%),
+    url('../images/login-bg.jpg') no-repeat center center fixed !important;
+  background-size: cover !important;
+  min-height: 100vh;
+}
+
+body.login-page-active footer {
+  background: rgba(0, 22, 51, 0.88) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+body.login-page-active footer .text-muted {
+  color: rgba(220, 230, 245, 0.75) !important;
+}
+
+body.login-page-active footer .text-dark,
+body.login-page-active footer strong {
+  color: #ffffff !important;
+}
+
+body.login-page-active #loginCardContainer .card {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 45px rgba(0, 15, 40, 0.45), 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ========================================================
    UNIFIED 2-IN-1 CORPORATE NAVIGATION BAR
    Tier 1 (Navy Blue): Brand Logo, Title, Subtitle, Actions
    Tier 2 (Clean White): Integrated Tabs, Status Badges

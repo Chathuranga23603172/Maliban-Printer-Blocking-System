@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showLoginUI() {
     currentUser = null;
+    document.body.classList.add('login-page-active');
     loginCardContainer.classList.remove('d-none');
     submissionContainer.classList.add('d-none');
     navUserBadgeItem.classList.add('d-none');
@@ -124,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showAuthenticatedUI(user) {
     currentUser = user;
+    document.body.classList.remove('login-page-active');
     loginCardContainer.classList.add('d-none');
     submissionContainer.classList.remove('d-none');
     navUserBadgeItem.classList.remove('d-none');
