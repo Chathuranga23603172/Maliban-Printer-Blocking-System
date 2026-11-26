@@ -214,21 +214,30 @@ async function compileMonthlyReport(targetYear, targetMonth) {
       }
     }
 
-    // Supervisor submissions on or before 25th 23:59:59
+    // Supervisor submissions: latest submission for this billing cycle / month
     if (currentTotal === null) {
       const sub = await dbAsync.get(
-        `SELECT print_count, submitted_at 
+        `SELECT print_count, submitted_at, week_start_date 
          FROM submissions 
          WHERE status = 'Submitted'
-           AND datetime(submitted_at) <= datetime(?)
            AND (
              (printer_id IS NOT NULL AND printer_id = ?)
              OR (department_id IS NOT NULL AND department_id = ?)
              OR LOWER(location) = LOWER(?)
            )
+           AND (
+             datetime(submitted_at) <= datetime(?)
+             OR (strftime('%Y', week_start_date) = ? AND CAST(strftime('%m', week_start_date) AS INTEGER) = ?)
+             OR (strftime('%Y', submitted_at) = ? AND CAST(strftime('%m', submitted_at) AS INTEGER) = ?)
+           )
          ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
-        [cycle.currentCutoff, p.printer_id || 0, p.dep_id || 0, cleanLocation]
+        [
+          p.printer_id || 0, p.dep_id || 0, cleanLocation,
+          cycle.currentCutoff,
+          String(cycle.year), cycle.month,
+          String(cycle.year), cycle.month
+        ]
       );
 
       if (sub && sub.print_count !== null && sub.print_count !== undefined) {
@@ -242,10 +251,14 @@ async function compileMonthlyReport(targetYear, targetMonth) {
       const fact = await dbAsync.get(
         `SELECT print_count, created_at 
          FROM fact_printer_count 
-         WHERE printer_id = ? AND datetime(created_at) <= datetime(?)
+         WHERE printer_id = ? 
+           AND (
+             datetime(created_at) <= datetime(?)
+             OR (strftime('%Y', created_at) = ? AND CAST(strftime('%m', created_at) AS INTEGER) = ?)
+           )
          ORDER BY datetime(created_at) DESC, count_id DESC
          LIMIT 1`,
-        [p.printer_id, cycle.currentCutoff]
+        [p.printer_id, cycle.currentCutoff, String(cycle.year), cycle.month]
       );
       if (fact && fact.print_count !== null) {
         currentTotal = fact.print_count;
@@ -270,18 +283,27 @@ async function compileMonthlyReport(targetYear, targetMonth) {
 
     if (prevTotal === null) {
       const subPrev = await dbAsync.get(
-        `SELECT print_count, submitted_at 
+        `SELECT print_count, submitted_at, week_start_date 
          FROM submissions 
          WHERE status = 'Submitted'
-           AND datetime(submitted_at) <= datetime(?)
            AND (
              (printer_id IS NOT NULL AND printer_id = ?)
              OR (department_id IS NOT NULL AND department_id = ?)
              OR LOWER(location) = LOWER(?)
            )
+           AND (
+             datetime(submitted_at) <= datetime(?)
+             OR (strftime('%Y', week_start_date) = ? AND CAST(strftime('%m', week_start_date) AS INTEGER) = ?)
+             OR (strftime('%Y', submitted_at) = ? AND CAST(strftime('%m', submitted_at) AS INTEGER) = ?)
+           )
          ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
-        [cycle.prevCutoff, p.printer_id || 0, p.dep_id || 0, cleanLocation]
+        [
+          p.printer_id || 0, p.dep_id || 0, cleanLocation,
+          cycle.prevCutoff,
+          String(cycle.prevYear), cycle.prevMonth,
+          String(cycle.prevYear), cycle.prevMonth
+        ]
       );
 
       if (subPrev && subPrev.print_count !== null) {
@@ -294,10 +316,14 @@ async function compileMonthlyReport(targetYear, targetMonth) {
       const factPrev = await dbAsync.get(
         `SELECT print_count, created_at 
          FROM fact_printer_count 
-         WHERE printer_id = ? AND datetime(created_at) <= datetime(?)
+         WHERE printer_id = ? 
+           AND (
+             datetime(created_at) <= datetime(?)
+             OR (strftime('%Y', created_at) = ? AND CAST(strftime('%m', created_at) AS INTEGER) = ?)
+           )
          ORDER BY datetime(created_at) DESC, count_id DESC
          LIMIT 1`,
-        [p.printer_id, cycle.prevCutoff]
+        [p.printer_id, cycle.prevCutoff, String(cycle.prevYear), cycle.prevMonth]
       );
       if (factPrev && factPrev.print_count !== null) {
         prevTotal = factPrev.print_count;
@@ -305,8 +331,9 @@ async function compileMonthlyReport(targetYear, targetMonth) {
       }
     }
 
-    // Baseline calculation: if previous month has no reading yet, check if there is an earliest reading
+    // Baseline calculation: if previous month has no reading yet, check if there is an earliest reading BEFORE current month
     if (prevTotal === null && currentTotal !== null) {
+      const monthStart = `${cycle.year}-${String(cycle.month).padStart(2, '0')}-01 00:00:00`;
       const initialSub = await dbAsync.get(
         `SELECT print_count, submitted_at
          FROM submissions
@@ -317,15 +344,15 @@ async function compileMonthlyReport(targetYear, targetMonth) {
              OR (department_id IS NOT NULL AND department_id = ?)
              OR LOWER(location) = LOWER(?)
            )
-         ORDER BY datetime(submitted_at) ASC, id ASC
+         ORDER BY datetime(submitted_at) DESC, id DESC
          LIMIT 1`,
-        [currentReadingDate || cycle.currentCutoff, p.printer_id || 0, p.dep_id || 0, cleanLocation]
+        [monthStart, p.printer_id || 0, p.dep_id || 0, cleanLocation]
       );
       if (initialSub && initialSub.print_count !== null) {
         prevTotal = initialSub.print_count;
         prevReadingDate = initialSub.submitted_at;
       } else {
-        // If currentTotal exists and no prior reading exists, default baseline is 0
+        // If currentTotal exists and no prior reading exists before current month, default baseline is 0
         prevTotal = 0;
       }
     }
