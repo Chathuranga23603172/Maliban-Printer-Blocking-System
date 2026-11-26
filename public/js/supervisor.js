@@ -385,6 +385,11 @@ document.addEventListener('DOMContentLoaded', () => {
         weekRangeDisplay.textContent = `Week: ${startDate.toLocaleDateString(undefined, options)} - ${endDate.toLocaleDateString(undefined, options)}`;
       }
 
+      const currentWeekSubtitle = document.getElementById('currentWeekSubtitle');
+      if (currentWeekSubtitle && currentWeekInfo) {
+        currentWeekSubtitle.textContent = `Active cycle starting Monday ${currentWeekInfo.weekStartDate}. Enforcement runs Mondays at 2:00 PM.`;
+      }
+
       const deadlineDate = new Date(currentWeekInfo.deadline);
       if (deadlineDisplay) {
         deadlineDisplay.innerHTML = `<i class="bi bi-clock-fill me-1"></i> Monday, ${deadlineDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
@@ -1335,6 +1340,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // Refresh button listener
+  const btnRefresh = document.getElementById('btnRefresh');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', async () => {
+      btnRefresh.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Refreshing...';
+      await Promise.all([loadWeekInfo(), loadLocations(), loadDepartments()]);
+      if (locationSelect) locationSelect.dispatchEvent(new Event('change'));
+      btnRefresh.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Data';
+    });
+  }
 
   // Initialize
   initAuth();
